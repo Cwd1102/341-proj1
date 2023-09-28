@@ -11,9 +11,20 @@ CSR::CSR() {
     m_next = nullptr;        //pointer to the next CSR object in linked list
 }
 CSR::~CSR() {
-    delete[] m_col_index;
-    delete[] m_row_index;
-    delete[] m_values;
+    if (m_col_index != nullptr) {
+        delete[] m_col_index;
+        m_col_index = nullptr;
+    }
+    
+    if (m_row_index != nullptr) {
+        delete[] m_row_index;
+        m_row_index = nullptr;
+    }
+    
+    if (m_values != nullptr) {
+        delete[] m_values;
+        m_values = nullptr;
+    }
 }
 CSR::CSR(const CSR& rhs) {
     m_nonzeros = rhs.m_nonzeros;      //number of non-zero values
@@ -21,7 +32,8 @@ CSR::CSR(const CSR& rhs) {
     m_n = rhs.m_n;                    //number of columns
     m_values = new int[m_nonzeros] {};
     m_col_index = new int[m_nonzeros] {};
-    m_row_index = new int[sizeof(m_row_index) / sizeof(int)] {0};    //array to store row indices 
+    m_row_index = new int[m_n + 1] {0};    //array to store row indices 
+
     m_next = nullptr;         //pointer to the next CSR object in linked list
 
     for (int i = 0; i < m_nonzeros; i++) {
@@ -32,8 +44,8 @@ CSR::CSR(const CSR& rhs) {
         m_col_index[i] = rhs.m_col_index[i]; //array to store column indices
     }
 
-    for (int i = 0; i < (sizeof(*m_row_index) / sizeof(int)); i++) {
-        m_row_index[i] = m_row_index[i];
+    for (int i = 0; i < rhs.m_m + 1; i++) {
+        m_row_index[i] = rhs.m_row_index[i];
     }
 
 }
@@ -72,7 +84,7 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
         }
 
         if (m_row_index == nullptr) {
-            m_row_index = new int[m_nonzeros] {0};
+            m_row_index = new int[m_n + 1] {0};
         }
         else {
             cout << "m_row_index already inited." << endl;
@@ -165,9 +177,18 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
     }
 }
 int CSR::getAt(int row, int  col) const {
-    int colIndex = 0;
-    int numInRow = 0;
+    //int colIndex = 0;
+    //int numInRow = 0;
+    int rowStart = m_row_index[row];
+    int rowEnd = m_row_index[row + 1] - 1;
 
+    for (int i = rowStart; i <= rowEnd ; i++) {
+        if (m_col_index[i] == col) {
+            return m_values[i];
+        }
+    }
+
+    /*
     for (int i = 1; i < m_n ; i++) {
         if (row == i) {
             numInRow = m_row_index[i + 1] - colIndex;
@@ -181,7 +202,7 @@ int CSR::getAt(int row, int  col) const {
         colIndex = m_row_index[i];
         
     }
-
+    */
     return 0;
 }
 bool CSR::operator==(const CSR& rhs) const {
@@ -210,7 +231,7 @@ bool CSR::operator==(const CSR& rhs) const {
         }
     }
 
-    for (int i = 0; i < sizeof(*m_row_index) / sizeof(int); i++) {
+    for (int i = 0; i < (rhs.m_n + 1); i++) {
         if (m_row_index[i] != rhs.m_row_index[i]) {
             return false;
         }
@@ -250,6 +271,21 @@ CSRList::CSRList(const CSRList& rhs) {
 
 }
 CSRList::~CSRList() {
+    CSR* temp = m_head;
+    CSR* next = nullptr;
+
+    while (temp != nullptr) {
+        if (temp->m_next != nullptr) {
+            next = temp->m_next;
+            delete temp;
+            temp = next;
+        }
+        else {
+            delete temp;
+            temp = nullptr;
+        }
+    
+    }
 
 }
 bool CSRList::empty() const {
@@ -261,31 +297,67 @@ bool CSRList::empty() const {
     }
 }
 void CSRList::insertAtHead(const CSR& matrix) {
-    CSR copy(matrix);
+    CSR *node = new CSR(matrix);
 
     if (m_head == nullptr) {
-        m_head = &copy;
+        m_head = node;
+        m_size++;
     }
     else {
-        copy.m_next = m_head;
-        m_head = &copy;
+        node->m_next = m_head;
+        m_head = node;
+        m_size++;
     }
 }
 void CSRList::clear() {
+    CSR* temp = m_head;
+    CSR* next = nullptr;
 
+    while (temp != nullptr) {
+        if (temp->m_next != nullptr) {
+            next = temp->m_next;
+            delete temp;
+            temp = next;
+        }
+        else {
+            delete temp;
+            temp = nullptr;
+        }
+
+    }
+    m_head = nullptr;
+    m_size = 0;
 }
 
 int CSRList::getAt(int CSRIndex, int row, int col) const {
     int position = 0;
+    CSR* temp = m_head;
 
+    while (CSRIndex != (position - 1)) {
+        if (position == CSRIndex) {
+            return temp->getAt(row, col);
+        }
+        else {
+            if (temp == nullptr) {
+                throw exception("Exception Error: Object is not in the list!");
+            }
+            else {
+                temp = temp->m_next;
+                position++;
+            }
 
-
+            }
+        }
     return -1;
-}
+    }
+
 bool CSRList::operator== (const CSRList& rhs) const {
+   
     return true;
 }
 const CSRList& CSRList::operator=(const CSRList& rhs) {
+
+
     return *this;
 }
 int CSRList::averageSparseRatio() {
