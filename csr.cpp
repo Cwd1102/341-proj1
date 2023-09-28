@@ -32,7 +32,7 @@ CSR::CSR(const CSR& rhs) {
     m_n = rhs.m_n;                    //number of columns
     m_values = new int[m_nonzeros] {};
     m_col_index = new int[m_nonzeros] {};
-    m_row_index = new int[m_n + 1] {0};    //array to store row indices 
+    m_row_index = new int[m_m + 1] {0};    //array to store row indices 
 
     m_next = nullptr;         //pointer to the next CSR object in linked list
 
@@ -84,7 +84,7 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
         }
 
         if (m_row_index == nullptr) {
-            m_row_index = new int[m_n + 1] {0};
+            m_row_index = new int[m_m + 1] {0};
         }
         else {
             cout << "m_row_index already inited." << endl;
@@ -108,24 +108,56 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
                 numLoops = arraySize;
             }
 
-        
+            for (int i = 0; i < arraySize; i++) {
+                if (array[i] != 0) {
+                    m_col_index[colCounter] = i % m_n;
+                    m_values[colCounter] = array[i];
+                    colCounter++;
+                    colIndex++;
+                    m_row_index[rowIndex]++;
+
+                    if (colIndex == m_n - 1) {
+                        if(rowIndex > m_n){
+                        
+                        }
+                        else {
+                            m_row_index[rowIndex + 1] = m_row_index[rowIndex];
+                            colIndex = 0;
+                        }
+                    }
+               
+                }
+            
+            }
+
+            /*
             for (int i = 0; i < numLoops; i++) {
                 if (array[i] != 0) {
                     m_col_index[colIndex] = colCounter;
                     m_row_index[rowIndex]++;
-                    m_values[colIndex] = array[i];
-                    colIndex++;
-
+                    if (colIndex > m_nonzeros) {
+                        cout << "m_col_index out of bounds" << endl;
+                    }
+                    else {
+                        m_values[colIndex] = array[i];
+                        colIndex++;
+                    }
                 }
                 colCounter++;
 
                 if (colCounter > n - 1) {
                     colCounter = 0;
-                    m_row_index[rowIndex + 1] = m_row_index[rowIndex];
-                    rowIndex++;
+                    if (rowIndex > (m_m + 1)) {
+                        cout << "m_row_index out of bounds" << endl;
+                    }
+                    else {
+                        m_row_index[rowIndex + 1] = m_row_index[rowIndex];
+                        rowIndex++;
+                    }
 
                 }
             }
+            */
         }
         
         /*
@@ -161,7 +193,7 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
         }
         cout << "\nrows" << endl;
 
-        for (int i = 0; i < m + 1; i++) {
+        for (int i = 0; i < m_m + 1; i++) {
             cout << m_row_index[i] << " ";
         }
         cout << endl;
@@ -187,22 +219,6 @@ int CSR::getAt(int row, int  col) const {
             return m_values[i];
         }
     }
-
-    /*
-    for (int i = 1; i < m_n ; i++) {
-        if (row == i) {
-            numInRow = m_row_index[i + 1] - colIndex;
-            for (int j = 0; j < numInRow; j++) {
-                if (m_col_index[(colIndex - 1) + j] == col) {
-                    return m_values[(colIndex - 1) + j];
-                }
-            }
-
-        }
-        colIndex = m_row_index[i];
-        
-    }
-    */
     return 0;
 }
 bool CSR::operator==(const CSR& rhs) const {
@@ -338,19 +354,22 @@ int CSRList::getAt(int CSRIndex, int row, int col) const {
             return temp->getAt(row, col);
         }
         else {
-            if (temp == nullptr) {
-                throw exception("Exception Error: Object is not in the list!");
+            try {
+                if (temp == nullptr) {
+                    throw runtime_error("Exception Error: Object is not in the list!");
+                }
+                else {
+                    temp = temp->m_next;
+                    position++;
+                }
             }
-            else {
-                temp = temp->m_next;
-                position++;
-            }
-
+            catch (runtime_error& e) {
+                throw e;
             }
         }
-    return -1;
     }
-
+    return -1;
+}
 bool CSRList::operator== (const CSRList& rhs) const {
    
     return true;
