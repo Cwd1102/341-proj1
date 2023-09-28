@@ -2,13 +2,13 @@
 #include "csr.h"
 ///////////////CSR Class Implementation///////////////
 CSR::CSR() {
-    int* m_values = nullptr;       //array to store non-zero values
-    int* m_col_index = nullptr;    //array to store column indices
-    int* m_row_index = nullptr;    //array to store row indices 
-    int m_nonzeros = 0;              //number of non-zero values
-    int m_m = 0;                    //number of rows
-    int m_n = 0;                    //number of columns
-    CSR * m_next = nullptr;        //pointer to the next CSR object in linked list
+    m_values = nullptr;       //array to store non-zero values
+    m_col_index = nullptr;    //array to store column indices
+    m_row_index = nullptr;    //array to store row indices 
+    m_nonzeros = 0;              //number of non-zero values
+    m_m = 0;                    //number of rows
+    m_n = 0;                    //number of columns
+    m_next = nullptr;        //pointer to the next CSR object in linked list
 }
 CSR::~CSR() {
     delete[] m_col_index;
@@ -16,13 +16,13 @@ CSR::~CSR() {
     delete[] m_values;
 }
 CSR::CSR(const CSR& rhs) {
-    int m_nonzeros = rhs.m_nonzeros;      //number of non-zero values
-    int m_m = rhs.m_m;                    //number of rows
-    int m_n = rhs.m_n;                    //number of columns
-    int* m_values = new int[m_nonzeros] {};
-    int* m_col_index = new int[m_nonzeros] {};
-    int* m_row_index = new int[sizeof(m_row_index) / sizeof(int)] {0};    //array to store row indices 
-    CSR* m_next = nullptr;         //pointer to the next CSR object in linked list
+    m_nonzeros = rhs.m_nonzeros;      //number of non-zero values
+    m_m = rhs.m_m;                    //number of rows
+    m_n = rhs.m_n;                    //number of columns
+    m_values = new int[m_nonzeros] {};
+    m_col_index = new int[m_nonzeros] {};
+    m_row_index = new int[sizeof(m_row_index) / sizeof(int)] {0};    //array to store row indices 
+    m_next = nullptr;         //pointer to the next CSR object in linked list
 
     for (int i = 0; i < m_nonzeros; i++) {
         m_values[i] = rhs.m_values[i];    //array to store non-zero values
@@ -35,7 +35,6 @@ CSR::CSR(const CSR& rhs) {
     for (int i = 0; i < (sizeof(*m_row_index) / sizeof(int)); i++) {
         m_row_index[i] = m_row_index[i];
     }
-
 
 }
 void CSR::clear() {
@@ -53,6 +52,9 @@ bool CSR::empty() const {
     return false;
 }
 void CSR::compress(int m, int n, int array[], int arraySize) {
+    m_m = m;
+    m_n = n;
+
     int m_valuesCounter = 0;
     if ((m * n) == arraySize) {
         //VARABLE INIT
@@ -251,10 +253,15 @@ CSRList::~CSRList() {
 
 }
 bool CSRList::empty() const {
-    return true;
+    if (m_head == nullptr) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 void CSRList::insertAtHead(const CSR& matrix) {
-    CSR copy = matrix;
+    CSR copy(matrix);
 
     if (m_head == nullptr) {
         m_head = &copy;
@@ -269,6 +276,10 @@ void CSRList::clear() {
 }
 
 int CSRList::getAt(int CSRIndex, int row, int col) const {
+    int position = 0;
+
+
+
     return -1;
 }
 bool CSRList::operator== (const CSRList& rhs) const {
