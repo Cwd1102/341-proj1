@@ -13,7 +13,7 @@ int main()
         int array1[] = { 10,20,0,0,0,0,0,30,0,40,0,0,0,0,50,60,70,0,0,0,0,0,0,80 };
         aCSR.compress(4, 6, array1, 24);//initialize object aCSR
         CSR bCSR(aCSR);//create bCSR using copy constructor
-        CSR cCSR;
+       CSR cCSR;
         int array2[] = { 0,0,0,0,100,200,0,0,300 };
         cCSR.compress(3, 3, array2, 9);//initialize object cCSR
         CSR dCSR(cCSR);//create dCSR using copy constructor

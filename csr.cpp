@@ -11,27 +11,14 @@ CSR::CSR() {
     m_next = nullptr;        //pointer to the next CSR object in linked list
 }
 CSR::~CSR() {
-    if (m_col_index != nullptr) {
-        delete[] m_col_index;
-        m_col_index = nullptr;
-    }
-    
-    if (m_row_index != nullptr) {
-        delete[] m_row_index;
-        m_row_index = nullptr;
-    }
-    
-    if (m_values != nullptr) {
-        delete[] m_values;
-        m_values = nullptr;
-    }
+    clear();
 }
 CSR::CSR(const CSR& rhs) {
     m_nonzeros = rhs.m_nonzeros;      //number of non-zero values
     m_m = rhs.m_m;                    //number of rows
     m_n = rhs.m_n;                    //number of columns
-    m_values = new int[m_nonzeros] {};
-    m_col_index = new int[m_nonzeros] {};
+    m_values = new int[m_nonzeros] {0};
+    m_col_index = new int[m_nonzeros] {0};
     m_row_index = new int[m_m + 1] {0};    //array to store row indices 
 
     m_next = nullptr;         //pointer to the next CSR object in linked list
@@ -70,17 +57,19 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
     int m_valuesCounter = 0;
     if ((m * n) == arraySize) {
         //VARABLE INIT
-        if (m_col_index == nullptr) {
-            m_col_index = new int[n] {0};
-        }
-        else {
-            cout << "m_col_index already inited." << endl;
-        }
+
 
         for (int i = 0; i < arraySize; i++) {
             if (array[i] != 0) {
                 m_nonzeros++;
             }
+        }
+
+        if (m_col_index == nullptr) {
+            m_col_index = new int[m_nonzeros] {0};
+        }
+        else {
+            cout << "m_col_index already inited." << endl;
         }
 
         if (m_row_index == nullptr) {
@@ -113,19 +102,17 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
                     m_col_index[colCounter] = i % m_n;
                     m_values[colCounter] = array[i];
                     colCounter++;
-                    colIndex++;
                     m_row_index[rowIndex]++;
 
-                    if (colIndex == m_n - 1) {
-                        if(rowIndex > m_n){
-                        
-                        }
-                        else {
-                            m_row_index[rowIndex + 1] = m_row_index[rowIndex];
-                            colIndex = 0;
-                        }
+                }
+                colIndex++;
+
+                if (colIndex == m_n) {
+                    if (rowIndex < m_m) {
+                        colIndex = 0;
+                        m_row_index[rowIndex + 1] = m_row_index[rowIndex];
+                        rowIndex++;
                     }
-               
                 }
             
             }
@@ -247,7 +234,7 @@ bool CSR::operator==(const CSR& rhs) const {
         }
     }
 
-    for (int i = 0; i < (rhs.m_n + 1); i++) {
+    for (int i = 0; i < (m_m + 1); i++) {
         if (m_row_index[i] != rhs.m_row_index[i]) {
             return false;
         }
@@ -314,6 +301,7 @@ bool CSRList::empty() const {
 }
 void CSRList::insertAtHead(const CSR& matrix) {
     CSR *node = new CSR(matrix);
+    
 
     if (m_head == nullptr) {
         m_head = node;
@@ -393,3 +381,5 @@ void CSRList::dump() {
     else
         cout << "Error: List is empty!" << endl;
 }
+
+
