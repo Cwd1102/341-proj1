@@ -18,9 +18,6 @@
     <ClCompile Include="csr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="driver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="mytest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

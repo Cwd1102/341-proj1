@@ -14,27 +14,36 @@ CSR::~CSR() {
     clear();
 }
 CSR::CSR(const CSR& rhs) {
-    m_nonzeros = rhs.m_nonzeros;      //number of non-zero values
-    m_m = rhs.m_m;                    //number of rows
-    m_n = rhs.m_n;                    //number of columns
-    m_values = new int[m_nonzeros] {0};
-    m_col_index = new int[m_nonzeros] {0};
-    m_row_index = new int[m_m + 1] {0};    //array to store row indices 
+    
+    if ((rhs.m_n == 0) && (rhs.m_n == 0)) {
+        m_col_index = nullptr;
+        m_row_index = nullptr;
+        m_values = nullptr;
+        m_nonzeros = rhs.m_nonzeros;
 
-    m_next = nullptr;         //pointer to the next CSR object in linked list
-
-    for (int i = 0; i < m_nonzeros; i++) {
-        m_values[i] = rhs.m_values[i];    //array to store non-zero values
-    }     
-
-    for (int i = 0; i < m_nonzeros; i++) {
-        m_col_index[i] = rhs.m_col_index[i]; //array to store column indices
     }
+    else {
+        m_nonzeros = rhs.m_nonzeros;      //number of non-zero values
+        m_m = rhs.m_m;                    //number of rows
+        m_n = rhs.m_n;                    //number of columns
+        m_values = new int[m_nonzeros] {0};
+        m_col_index = new int[m_nonzeros] {0};
+        m_row_index = new int[m_m + 1] {0};    //array to store row indices 
 
-    for (int i = 0; i < rhs.m_m + 1; i++) {
-        m_row_index[i] = rhs.m_row_index[i];
+        m_next = nullptr;         //pointer to the next CSR object in linked list
+
+        for (int i = 0; i < m_nonzeros; i++) {
+            m_values[i] = rhs.m_values[i];    //array to store non-zero values
+        }
+
+        for (int i = 0; i < m_nonzeros; i++) {
+            m_col_index[i] = rhs.m_col_index[i]; //array to store column indices
+        }
+
+        for (int i = 0; i < rhs.m_m + 1; i++) {
+            m_row_index[i] = rhs.m_row_index[i];
+        }
     }
-
 }
 void CSR::clear() {
     delete[] m_col_index;
@@ -53,9 +62,8 @@ bool CSR::empty() const {
 void CSR::compress(int m, int n, int array[], int arraySize) {
     m_m = m;
     m_n = n;
-
     int m_valuesCounter = 0;
-    if ((m * n) == arraySize) {
+    if (!(m == 0 && n == 0)) {
         //VARABLE INIT
 
 
@@ -63,6 +71,9 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
             if (array[i] != 0) {
                 m_nonzeros++;
             }
+        }
+        if (m_nonzeros == 0) {
+            m_nonzeros = arraySize;
         }
 
         if (m_col_index == nullptr) {
@@ -97,47 +108,36 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
                 numLoops = arraySize;
             }
 
-            for (int i = 0; i < arraySize; i++) {
-                if (array[i] != 0) {
-                    m_col_index[colCounter] = i % m_n;
-                    m_values[colCounter] = array[i];
-                    colCounter++;
-                    m_row_index[rowIndex]++;
+            for (int i = 0; i < numLoops; i++) {
+                    if (array[i] != 0) {
+                        m_col_index[colCounter] = i % m_n;
+                        m_values[colCounter] = array[i];
+                        colCounter++;
+                        m_row_index[rowIndex]++;
 
-                }
-                colIndex++;
-
-                if (colIndex == m_n) {
-                    if (rowIndex < m_m) {
-                        colIndex = 0;
-                        m_row_index[rowIndex + 1] = m_row_index[rowIndex];
-                        rowIndex++;
                     }
-                }
+                    colIndex++;
 
+                    if (colIndex == m_n) {
+                        if (rowIndex < m_m) {
+                            colIndex = 0;
+                            m_row_index[rowIndex + 1] = m_row_index[rowIndex];
+                            rowIndex++;
+                        }
+                    }
+                
             }
-        }
-        
-        //*****DEBUG BELOW*******
-        /*
-        cout << "Cols" << endl;
-        for (int i = 0; i < m_nonzeros; i++) {
-            cout << m_col_index[i] << " ";
+            if (m_row_index[m_m ] == 0) {
+                m_row_index[m_m] = m_row_index[m_m - 1];
+            }
 
-        }
-        cout << "\nrows" << endl;
-
-        for (int i = 0; i < m_m + 1; i++) {
-            cout << m_row_index[i] << " ";
-        }
-        cout << endl;
-        */
-        //******DEBUG ABOVE***********
+        }  
     }
     else {
         if ((m == 0)&&(n == 0)) {
-            m_col_index = new int[0];
-            m_row_index = new int[0];
+            m_col_index = nullptr;
+            m_row_index = nullptr;
+            m_values = nullptr;
             m_nonzeros = 0;
 
         }
@@ -158,6 +158,7 @@ int CSR::getAt(int row, int  col) const {
 }
 bool CSR::operator==(const CSR& rhs) const {
 
+
     if (m_nonzeros != rhs.m_nonzeros) {
         return false;
     }
@@ -170,25 +171,39 @@ bool CSR::operator==(const CSR& rhs) const {
         return false;
     }
 
-    for (int i = 0; i < m_nonzeros; i++) {
-        if (m_values[i] != rhs.m_values[i]) {
+    if (((rhs.m_n == 0) && (rhs.m_m == 0))) {
+        if (m_values != rhs.m_values) {
             return false;
         }
-    }
-
-    for (int i = 0; i < m_nonzeros; i++) {
-        if (m_col_index[i] != rhs.m_col_index[i]) {
-            return false;
-        }
-    }
-
-    for (int i = 0; i < (m_m + 1); i++) {
-        if (m_row_index[i] != rhs.m_row_index[i]) {
+    
+        if (m_row_index != rhs.m_row_index) {
             return false;
         }
 
+        if (m_col_index != rhs.m_col_index) {
+            return false;
+        }
     }
+    else {
+        for (int i = 0; i < m_nonzeros; i++) {
+            if (m_values[i] != rhs.m_values[i]) {
+                return false;
+            }
+        }
 
+        for (int i = 0; i < m_nonzeros; i++) {
+            if (m_col_index[i] != rhs.m_col_index[i]) {
+                return false;
+            }
+        }
+
+        for (int i = 0; i < (m_m + 1); i++) {
+            if (m_row_index[i] != rhs.m_row_index[i]) {
+                return false;
+            }
+
+        }
+    }
     return true;
 }
 int CSR::sparseRatio() {

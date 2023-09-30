@@ -128,7 +128,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="csr.cpp" />
-    <ClCompile Include="driver.cpp" />
     <ClCompile Include="mytest.cpp" />
   </ItemGroup>
   <ItemGroup>
