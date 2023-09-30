@@ -114,65 +114,12 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
                         rowIndex++;
                     }
                 }
-            
+
             }
-
-            /*
-            for (int i = 0; i < numLoops; i++) {
-                if (array[i] != 0) {
-                    m_col_index[colIndex] = colCounter;
-                    m_row_index[rowIndex]++;
-                    if (colIndex > m_nonzeros) {
-                        cout << "m_col_index out of bounds" << endl;
-                    }
-                    else {
-                        m_values[colIndex] = array[i];
-                        colIndex++;
-                    }
-                }
-                colCounter++;
-
-                if (colCounter > n - 1) {
-                    colCounter = 0;
-                    if (rowIndex > (m_m + 1)) {
-                        cout << "m_row_index out of bounds" << endl;
-                    }
-                    else {
-                        m_row_index[rowIndex + 1] = m_row_index[rowIndex];
-                        rowIndex++;
-                    }
-
-                }
-            }
-            */
         }
         
-        /*
-        if (m_values == nullptr) {
-            int colIndex = 0;
-            int rowIndex = 1;
-
-            m_values = new int[m_nonzeros] {};
-            for (int i = 0; i < arraySize; i++) {
-                if (array[i] != 0) {
-                    m_values[m_valuesCounter] = array[i];
-                    m_col_index[colIndex] = colCounter;
-                    m_row_index[rowIndex]++;
-                    colIndex++;
-                    m_valuesCounter++;
-                }
-
-                colCounter++;
-                if (colCounter > (n - 1)) {
-                    colCounter = 0;
-                    m_row_index[rowIndex + 1] = m_row_index[rowIndex];
-                    rowIndex++;
-                }
-            }
-        }
-        */
         //*****DEBUG BELOW*******
-        
+        /*
         cout << "Cols" << endl;
         for (int i = 0; i < m_nonzeros; i++) {
             cout << m_col_index[i] << " ";
@@ -184,6 +131,7 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
             cout << m_row_index[i] << " ";
         }
         cout << endl;
+        */
         //******DEBUG ABOVE***********
     }
     else {
@@ -271,7 +219,13 @@ CSRList::CSRList() {
     m_size = 0;
 }
 CSRList::CSRList(const CSRList& rhs) {
+    CSR* temp = rhs.m_head;
+    m_size = 0;
 
+    while (temp != nullptr) {
+        insertAtHead(*temp);
+        temp = temp->m_next;
+    }
 }
 CSRList::~CSRList() {
     CSR* temp = m_head;
@@ -359,11 +313,40 @@ int CSRList::getAt(int CSRIndex, int row, int col) const {
     return -1;
 }
 bool CSRList::operator== (const CSRList& rhs) const {
-   
+    CSR *thisPtr = m_head;
+    CSR* rhsPtr = rhs.m_head;
+
+    while ((thisPtr != nullptr)) {
+        if (thisPtr == rhsPtr) {}
+        else {
+            return false;
+        }
+
+        if (thisPtr != nullptr) {
+            thisPtr = thisPtr->m_next;
+        }
+        else {
+            cout << "thisPtr out of bounds!" << endl;
+        }
+
+        if (rhsPtr != nullptr) {
+            rhsPtr = rhsPtr->m_next;
+        }
+        else {
+            cout << "rhsPtr out of bounds!" << endl;
+        }
+    }
+
     return true;
 }
 const CSRList& CSRList::operator=(const CSRList& rhs) {
+    CSR* temp = rhs.m_head;
+    m_size = 0;
 
+    while (temp != nullptr) {
+        insertAtHead(*temp);
+        temp = temp->m_next;
+    }
 
     return *this;
 }
