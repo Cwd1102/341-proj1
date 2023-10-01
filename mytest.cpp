@@ -162,6 +162,13 @@ int main() {
 	else {
 		cout << "Test overloaded  normal copy constructor failed" << endl;
 	}
+	if (test1.testGetAt(0, 0, array3, 12)) {
+	}
+	else {
+		cout << "Test overloaded error copy constructor failed" << endl;
+	}
+
+
 	cout << "All tests passed" << endl;
 	return 0;
 }

@@ -146,12 +146,14 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
 int CSR::getAt(int row, int  col) const {
     //int colIndex = 0;
     //int numInRow = 0;
-    int rowStart = m_row_index[row];
-    int rowEnd = m_row_index[row + 1] - 1;
+    if (!((row * col) == 0)) {
+        int rowStart = m_row_index[row];
+        int rowEnd = m_row_index[row + 1] - 1;
 
-    for (int i = rowStart; i <= rowEnd ; i++) {
-        if (m_col_index[i] == col) {
-            return m_values[i];
+        for (int i = rowStart; i <= rowEnd; i++) {
+            if (m_col_index[i] == col) {
+                return m_values[i];
+            }
         }
     }
     return 0;
