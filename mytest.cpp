@@ -129,6 +129,14 @@ public:
 		}
 
 	}
+
+	bool testListGetAt(int row, int cols, int nums[], int size) {
+		CSR test;
+		test.compress(row, cols, nums, size);
+
+
+	}
+
 private:
 
 };
