@@ -103,23 +103,43 @@ public:
 
 
 			}
-		
 		}
-
-		
 	}
 
+	bool testOverloaded() {
+		int array1[] = { 0,10,0,20,0,0,30,40,0,0,50,0,60,0,70,80 };
+		int array2[] = {0,0,100,0,200,0,300,0,0,400,500,0};
+		CSR list1;
+		CSR list2;
+		list1.compress(4, 4, array1, 16);
+		list2.compress(3, 4, array2, 12);
+		CSRList test;
+		test.insertAtHead(list1);
+		test.insertAtHead(list2);
+		CSRList test1(test);
+
+		if (!(test == test1)) {
+			return false;
+		}
+
+		CSRList test2;
+		CSRList test3(test1);
+		if (!(test1 == test3)) {
+			return false;
+		}
+
+	}
 private:
 
 };
 
 int main() {
 	Tester test1;
-	int array1[16]{0};
-	int array2[] = { 10,20,0,30,40,0,0,50,60,70,0,80};
+	int array1[16]{ 0 };
+	int array2[] = { 10,20,0,30,40,0,0,50,60,70,0,80 };
 
 
-	if (test1.testCompress(4,4,array1,16)) {
+	if (test1.testCompress(4, 4, array1, 16)) {
 	}
 	else {
 		cout << "Test compress error case failed" << endl;
@@ -135,7 +155,7 @@ int main() {
 		cout << "Test compress error case failed" << endl;
 	}
 	int array3[]{ 0,20,40,0,0,60,0,80,100,0,120,0 };
-	
+
 	if (test1.testOverload(3, 4, array3, 12)) {
 	}
 	else {
@@ -157,18 +177,29 @@ int main() {
 		cout << "Test overloaded error copy constructor failed" << endl;
 	}
 
-	if (test1.testGetAt(3, 4, array3, 12)) {
+	try {
+		test1.testGetAt(3, 4, array3, 12);
+	}
+	catch (runtime_error& e) {
+		cout << "Test getat error failed" << endl;
+	}
+
+	try {
+		test1.testGetAt(0, 0, array3, 12);
+		cout << "Test getat error failed" << endl;
+	}
+	catch (runtime_error& e) {
+		cout << "getAt threw exception, Passed" << endl;
+	}
+
+	if (test1.testOverloaded()) {
 	}
 	else {
-		cout << "Test overloaded  normal copy constructor failed" << endl;
-	}
-	if (test1.testGetAt(0, 0, array3, 12)) {
-	}
-	else {
-		cout << "Test overloaded error copy constructor failed" << endl;
+		cout << "test overloaded failed" << endl;
 	}
 
 
-	cout << "All tests passed" << endl;
+
+	cout << "Testing Complete" << endl;
 	return 0;
 }

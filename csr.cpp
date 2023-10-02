@@ -146,17 +146,24 @@ void CSR::compress(int m, int n, int array[], int arraySize) {
 int CSR::getAt(int row, int  col) const {
     //int colIndex = 0;
     //int numInRow = 0;
-    if (!((row * col) == 0)) {
-        int rowStart = m_row_index[row];
-        int rowEnd = m_row_index[row + 1] - 1;
+    try {
+        if (!((m_m * m_n) == 0)) {
+            int rowStart = m_row_index[row];
+            int rowEnd = m_row_index[row + 1] - 1;
 
-        for (int i = rowStart; i <= rowEnd; i++) {
-            if (m_col_index[i] == col) {
-                return m_values[i];
+            for (int i = rowStart; i <= rowEnd; i++) {
+                if (m_col_index[i] == col) {
+                    return m_values[i];
+                }
             }
+            throw runtime_error("The number does not exist");
+
         }
+        throw runtime_error("The number does not exist");
     }
-    return 0;
+    catch (runtime_error& e) {
+        throw e;
+    }
 }
 bool CSR::operator==(const CSR& rhs) const {
 
@@ -236,13 +243,28 @@ CSRList::CSRList() {
     m_size = 0;
 }
 CSRList::CSRList(const CSRList& rhs) {
-    CSR* temp = rhs.m_head;
-    m_size = 0;
+        m_head = nullptr;
+        m_size = 0;
 
-    while (temp != nullptr) {
-        insertAtHead(*temp);
-        temp = temp->m_next;
-    }
+        CSR* temp = rhs.m_head;
+
+        while (temp != nullptr) {
+            insertAtHead(*temp);
+            temp = temp->m_next;
+        }
+
+        CSR* prev = nullptr;
+        CSR* current = m_head;
+        CSR* next = nullptr;
+
+        while (current != nullptr) {
+            next = current->m_next;
+            current->m_next = prev;
+            prev = current;
+            current = next;
+        }
+
+        m_head = prev;
 }
 CSRList::~CSRList() {
     CSR* temp = m_head;
@@ -331,10 +353,10 @@ int CSRList::getAt(int CSRIndex, int row, int col) const {
 }
 bool CSRList::operator== (const CSRList& rhs) const {
     CSR *thisPtr = m_head;
-    CSR* rhsPtr = rhs.m_head;
+    CSR *rhsPtr = rhs.m_head;
 
     while ((thisPtr != nullptr)) {
-        if (thisPtr == rhsPtr) {}
+        if (*thisPtr == *rhsPtr) {}
         else {
             return false;
         }
@@ -363,6 +385,7 @@ const CSRList& CSRList::operator=(const CSRList& rhs) {
     while (temp != nullptr) {
         insertAtHead(*temp);
         temp = temp->m_next;
+        m_size++;
     }
 
     return *this;
